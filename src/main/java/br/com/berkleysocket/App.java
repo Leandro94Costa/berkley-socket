@@ -9,8 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Hello world!
  *
  */
-public class App 
-{
+public class App {
+
     @Test
     public void givenGreetingClient_whenServerRespondsWhenStarted_thenCorrect() {
         GreetClient client = new GreetClient();
