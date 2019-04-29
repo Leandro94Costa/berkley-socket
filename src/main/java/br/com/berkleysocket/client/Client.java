@@ -9,7 +9,7 @@ import java.util.Scanner;
 public class Client {
 
     private String serverName = "localhost";
-    private int serverPort = 7777;  // Server 1: 5555, Server 2: 6666, Server 3: 7777
+    private int serverPort = 7777;  // ServerView 1: 5555, ServerView 2: 6666, ServerView 3: 7777
     private Socket socket = null;
     private DataOutputStream dos = null;
 
@@ -21,10 +21,10 @@ public class Client {
 
             dos = new DataOutputStream(socket.getOutputStream());
 
-            Scanner scan=new Scanner(System.in);
+            Scanner scan = new Scanner(System.in);
             while (true) {
                 try {
-                    System.out.print("Message to server : ");
+                    System.out.print("Message to server: ");
                     String messageToServer = scan.nextLine();
                     if(messageToServer.equals("exit")){
                         break;
