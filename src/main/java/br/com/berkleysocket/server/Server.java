@@ -30,10 +30,12 @@ public class Server implements Runnable {
             view.setVisible(true);
             view.addMessage("ServerView started on port " + serverSocket.getLocalPort() + "...");
             view.addMessage("Waiting for client...");
+            view.setButtonsServerUp();
             thread = new Thread(this);
             thread.start();
         } catch (IOException e) {
             view.addMessage("Can not bind to port : " + e);
+            view.setButtonServerDown();
         }
     }
 
