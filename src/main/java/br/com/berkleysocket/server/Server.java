@@ -17,25 +17,27 @@ import java.net.SocketAddress;
 // If the client user types "exit", the client will quit.
 public class Server implements Runnable {
 
-    private int port = 7777;
     private ServerSocket serverSocket = null;
     private Thread thread = null;
     private ChatServerThread clients[] = new ChatServerThread[50];
     private int clientCount = 0;
-    private ServerView view = new ServerView();
+    private ServerView view;
 
-    public Server() {
+    public Server(ServerView view) {
+        this.view = view;
+    }
+
+    public void start(int port) {
         try {
             serverSocket = new ServerSocket(port);
-            view.setVisible(true);
-            view.addMessage("ServerView started on port " + serverSocket.getLocalPort() + "...");
-            view.addMessage("Waiting for client...");
+            view.addMessage("Servidor inicializado na porta " + serverSocket.getLocalPort() + "...");
+            view.addMessage("Esperando por cliente...");
             view.setButtonsServerUp();
             thread = new Thread(this);
             thread.start();
         } catch (IOException e) {
-            view.addMessage("Can not bind to port : " + e);
-            view.setButtonServerDown();
+            view.addMessage("Não foi possível se conectar a porta " + port + "\nErro: " + e);
+            view.setButtonsServerDown();
         }
     }
 
@@ -44,9 +46,11 @@ public class Server implements Runnable {
         while (thread != null) {
             try {
                 // wait until client socket connecting, then add new thread
-                addThreadClient(serverSocket.accept());
+                if (!serverSocket.isClosed()) {
+                    addThreadClient(serverSocket.accept());
+                }
             } catch (IOException e) {
-                view.addMessage("ServerView accept error : " + e);
+                view.addMessage("Erro de servidor: " + e);
                 stop();
             }
         }
@@ -86,7 +90,7 @@ public class Server implements Runnable {
         int index = findClient(ID);
         if (index >= 0) {
             ChatServerThread threadToTerminate = clients[index];
-            view.addMessage("Removing client thread " + ID + " at " + index);
+            view.addMessage("Removendo cliente " + ID + " at " + index);
             if (index < clientCount - 1) {
                 for (int i = index + 1; i < clientCount; i++) {
                     clients[i - 1] = clients[i];
@@ -96,7 +100,7 @@ public class Server implements Runnable {
             try {
                 threadToTerminate.close();
             } catch (IOException e) {
-                view.addMessage("Error closing thread : " + e.getMessage());
+                view.addMessage("Erro ao thread: " + e.getMessage());
             }
         }
     }
@@ -107,11 +111,18 @@ public class Server implements Runnable {
             clients[clientCount].start();
             clientCount++;
         } else {
-            view.addMessage("Client refused : maximum " + clients.length + " reached.");
+            view.addMessage("Cliente recusado: máximo " + clients.length + " alcançado.");
         }
     }
 
-    public static void main(String[] args) {
-        Server server = new Server();
+    public void shutdown() {
+        try {
+            stop();
+            serverSocket.close();
+            view.addMessage("Servidor encerrado");
+            view.setButtonsServerDown();
+        } catch (IOException e) {
+            view.addMessage("Erro ao encerrar servidor. \nErro: " + e.getMessage());
+        }
     }
 }
