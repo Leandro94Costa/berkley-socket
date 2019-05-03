@@ -1,4 +1,4 @@
-package br.com.berkleysocket.client;
+package Socket_Chat.client2;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

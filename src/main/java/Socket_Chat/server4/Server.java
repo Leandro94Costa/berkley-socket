@@ -1,6 +1,4 @@
-package br.com.berkleysocket.server;
-
-import br.com.berkleysocket.view.ServerView;
+package Socket_Chat.server4;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -9,35 +7,29 @@ import java.net.SocketAddress;
 
 // SERVER : Multi ServerView
 // TIPE : Two-Way Communication (Client to ServerView, ServerView to Client)
-// DESCRIPTION :
-// A simple server that will accept multi client connection and display everything the client says on the screen.
+// DESCRIPTION : 
+// A simple server that will accept multi client connection and display everything the client says on the screen. 
 // The ServerView can handle multiple clients simultaneously.
 // The ServerView can sends all text received from any of the connected clients to all clients,
 // this means the ServerView has to receive and send, and the client has to send as well as receive.
 // If the client user types "exit", the client will quit.
 public class Server implements Runnable {
 
+    private int port = 7777;
     private ServerSocket serverSocket = null;
     private Thread thread = null;
     private ChatServerThread clients[] = new ChatServerThread[50];
     private int clientCount = 0;
-    private ServerView view;
 
-    public Server(ServerView view) {
-        this.view = view;
-    }
-
-    public void start(int port) {
+    public Server() {
         try {
             serverSocket = new ServerSocket(port);
-            view.addMessage("Servidor inicializado na porta " + serverSocket.getLocalPort() + "...");
-            view.addMessage("Esperando por cliente...");
-            view.setButtonsServerUp();
+            System.out.println("ServerView started on port " + serverSocket.getLocalPort() + "...");
+            System.out.println("Waiting for client...");
             thread = new Thread(this);
             thread.start();
         } catch (IOException e) {
-            view.addMessage("Não foi possível se conectar a porta " + port + "\nErro: " + e);
-            view.setButtonsServerDown();
+            System.out.println("Can not bind to port : " + e);
         }
     }
 
@@ -46,19 +38,15 @@ public class Server implements Runnable {
         while (thread != null) {
             try {
                 // wait until client socket connecting, then add new thread
-                if (!serverSocket.isClosed()) {
-                    addThreadClient(serverSocket.accept());
-                }
+                addThreadClient(serverSocket.accept());
             } catch (IOException e) {
-                if (!"socket closed".equals(e.getMessage())) {
-                    view.addMessage("Erro de servidor: " + e.getMessage());
-                }
+                System.out.println("ServerView accept error : " + e);
                 stop();
             }
         }
     }
 
-    private void stop() {
+    public void stop() {
         if (thread != null) {
             thread = null;
         }
@@ -73,7 +61,7 @@ public class Server implements Runnable {
         return -1;
     }
 
-    synchronized void handle(SocketAddress ID, String input) {
+    public synchronized void handle(SocketAddress ID, String input) {
         if (input.equals("exit")) {
             clients[findClient(ID)].send("exit");
             remove(ID);
@@ -88,11 +76,11 @@ public class Server implements Runnable {
         }
     }
 
-    synchronized void remove(SocketAddress ID) {
+    public synchronized void remove(SocketAddress ID) {
         int index = findClient(ID);
         if (index >= 0) {
             ChatServerThread threadToTerminate = clients[index];
-            view.addMessage("Removendo cliente " + ID + " at " + index);
+            System.out.println("Removing client thread " + ID + " at " + index);
             if (index < clientCount - 1) {
                 for (int i = index + 1; i < clientCount; i++) {
                     clients[i - 1] = clients[i];
@@ -102,29 +90,22 @@ public class Server implements Runnable {
             try {
                 threadToTerminate.close();
             } catch (IOException e) {
-                view.addMessage("Erro ao thread: " + e.getMessage());
+                System.out.println("Error closing thread : " + e.getMessage());
             }
         }
     }
 
     private void addThreadClient(Socket socket) {
         if (clientCount < clients.length) {
-            clients[clientCount] = new ChatServerThread(this, socket, view);
+            clients[clientCount] = new ChatServerThread(this, socket);
             clients[clientCount].start();
             clientCount++;
         } else {
-            view.addMessage("Cliente recusado: máximo " + clients.length + " alcançado.");
+            System.out.println("Client refused : maximum " + clients.length + " reached.");
         }
     }
 
-    public void shutdown() {
-        try {
-            stop();
-            serverSocket.close();
-            view.addMessage("Servidor encerrado");
-            view.setButtonsServerDown();
-        } catch (IOException e) {
-            view.addMessage("Erro ao encerrar servidor. \nErro: " + e.getMessage());
-        }
+    public static void main(String[] args) {
+        Server server = new Server();
     }
 }

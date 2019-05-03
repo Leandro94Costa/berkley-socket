@@ -6,7 +6,6 @@ import javax.swing.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Calendar;
-import java.util.Date;
 
 public class ServerView extends JFrame {
     private JTextArea txtMessage;

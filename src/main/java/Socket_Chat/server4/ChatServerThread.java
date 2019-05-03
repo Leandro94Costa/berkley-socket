@@ -1,6 +1,4 @@
-package br.com.berkleysocket.server;
-
-import br.com.berkleysocket.view.ServerView;
+package Socket_Chat.server4;
 
 import java.io.*;
 import java.net.Socket;
@@ -8,21 +6,19 @@ import java.net.SocketAddress;
 
 public class ChatServerThread extends Thread {
 
-    private Server server;
-    private Socket socket;
-    private SocketAddress ID;
+    private Server server = null;
+    private Socket socket = null;
+    private SocketAddress ID = null;
     private BufferedInputStream bis = null;
     private DataInputStream dis = null;
     private BufferedOutputStream bos = null;
     private DataOutputStream dos = null;
-    private ServerView view;
 
-    public ChatServerThread(Server _server, Socket _socket, ServerView view) {
+    public ChatServerThread(Server _server, Socket _socket) {
         super();
         server = _server;
         socket = _socket;
         ID = socket.getRemoteSocketAddress();
-        this.view = view;
     }
 
     public SocketAddress getID() {
@@ -30,21 +26,19 @@ public class ChatServerThread extends Thread {
     }
 
     public void send(String message) {
-        //try {
-            /*dos.writeUTF(message);
-            dos.flush();*/
-            view.addMessage(message);
-        /*} catch (IOException e) {
+        try {
+            dos.writeUTF(message);
+            dos.flush();
+        } catch (IOException e) {
             System.out.println("Client " + socket.getRemoteSocketAddress() + " error sending : " + e.getMessage());
             server.remove(ID);
-        }*/
+        }
     }
 
     @Override
     public void run() {
         try {
-            //System.out.println("Client " + socket.getRemoteSocketAddress() + " connected to server...");
-            view.addMessage("Cliente " + socket.getRemoteSocketAddress() + " conectado ao servidor...");
+            System.out.println("Client " + socket.getRemoteSocketAddress() + " connected to server...");
 
             bis = new BufferedInputStream(socket.getInputStream());
             dis = new DataInputStream(bis);
@@ -61,8 +55,7 @@ public class ChatServerThread extends Thread {
     }
 
     public void close() throws IOException {
-        //System.out.println("Client " + socket.getRemoteSocketAddress() + " disconnect from server...");
-        view.addMessage("Cliente " + socket.getRemoteSocketAddress() + " desconectado do servidor...");
+        System.out.println("Client " + socket.getRemoteSocketAddress() + " disconnect from server...");
         socket.close();
         dis.close();
         dos.close();
